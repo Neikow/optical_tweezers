@@ -35,10 +35,11 @@ n0 = 1.00  # refractive index of free space
 m = n0 / n1
 M = ((m ** 2 - 1) / (m ** 2 + 2)) ** 2
 eta0 = 377  # (ohm) impedance of the medium
+mu = 1e-8  # (Pa.s) dynamic viscosity of the medium
 
 # Simulation properties
 N = 400  # precision of the simulation
-dt = 0.05  # s (time step)
+dt = 0.5  # s (time step)
 max_distance: float = zR * 3  # m (distance of the simulation)
 max_radius: float = w0 * 1.5  # m (maximum radius of the simulation)
 
@@ -85,7 +86,8 @@ def setup_axis(axis: plt.Axes):
     axis.set_xlabel('r (m)')
     axis.set_ylabel('z (m)')
     axis.imshow(I_at, cmap='magma', extent=(-max_radius, max_radius, -max_distance, max_distance))
-    ax.text(0.01, 0.95, f'Position:\nr={body.position.x:.3e}, z={body.position.y:.3e}', transform=ax.transAxes, color='white')
+    ax.text(0.01, 0.95,
+            f'Position:\nr={body.position.x:.3e}, z={body.position.y:.3e}', transform=ax.transAxes, color='white')
 
 
 # exit on close
@@ -104,8 +106,7 @@ def brownian_force():
 
 
 def friction_force(b: pm.Body):
-    friction_coefficient = 0.5e-6
-    force = -friction_coefficient * b.velocity * abs(b.velocity)
+    force = -6 * pi * mu * radius * b.velocity
     return force
 
 
@@ -169,7 +170,7 @@ while True:
     setup_axis(ax)
     x, y = body.position.x, body.position.y
 
-    if frame % 5 == 0:
+    if frame % 1 == 0:
         position_history.append((x, y))
 
     if display_path:
